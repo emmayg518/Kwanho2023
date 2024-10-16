@@ -18,6 +18,9 @@ To replicate the experiment, the main stimuli will include a charitable donation
 
 One challenge will be designing the donation collection screens in a way that mimics real-world charity websites, making the stimuli both realistic and easy for participants to understand. Another potential difficulty is ensuring that participants take the scenario seriously, especially in an online setting where hypothetical donations might not fully capture real-world behaviors. Additionally, recruiting a sufficient and diverse sample of participants with varying levels of donation experience could be challenging, as previous donation experience has been shown to influence outcomes.
 
+The link to the repository: https://github.com/emmayg518/suk2023 \
+The link to the original paper folder: https://github.com/emmayg518/suk2023/tree/main/original_paper
+
 ## Methods
 
 ### Power Analysis
