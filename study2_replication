@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>RT Experiment</title>
+   <script src="https://unpkg.com/jspsych@8.0.0"></script>
+   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
+   <link href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css" rel="stylesheet" type="text/css"/>   
+   <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.3"></script>
+   <script src="https://unpkg.com/@jspsych/plugin-survey-multi-choice@1.1.3"></script>
+</head>
+<body></body>
+<script>
+var jsPsych = initJsPsych({
+   on_finish: function () {
+     jsPsych.data.displayData();
+   }
+});
+
+const subject_id = jsPsych.randomization.randomID(10);
+const filename = `${subject_id}.csv`;
+var timeline = [];
+
+// Welcome and consent
+var welcome = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: "<p>Welcome to the experiment. By proceeding, you consent to participate.</p><p>Press any key to continue.</p>"
+};
+
+// Daily routines survey introduction
+var survey_intro = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: "<p>We’re interested in understanding people’s daily routines and lifestyle preferences.</p><p>Press any key to start the survey.</p>"
+};
+
+// Unrelated survey questions
+var unrelatedSurvey = {
+   type: jsPsychSurveyMultiChoice,
+   questions: [
+      {prompt: "On average, how many hours of sleep do you get per night?", options: ["More than 10 hours", "9-10 hours", "7-8 hours", "5-6 hours", "4 hours or less"], required: true},
+      // More questions added here...
+   ]
+};
+
+// Attention checks
+var attentionCheck = {
+   type: jsPsychSurveyMultiChoice,
+   questions: [
+      {prompt: "What is the chance you will receive an additional $6 with the option to donate?", options: ["50%", "20%", "10%"], required: true},
+      {prompt: "How do charities use their donations?", options: ["To support an advertised cause", "To maintain their necessary expenses", "All of the above", "None of the above"], required: true}
+   ]
+};
+
+// Prize explanation and charity details
+var prizeExplanation = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: "<p>Thank you for completing the survey on your lifestyle. 20% of participants will receive an additional $6 as a bonus prize.</p>"
+};
+
+var charityDescription = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: "<p>Today, you’ll have the opportunity to support a campaign aiding children born with disabilities in Asia, run by a trustworthy charity.</p><p>Press any key to continue.</p>"
+};
+
+// Donation input with conditions
+var donationInput = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: function() {
+      return `
+         <p>If you win the $6 prize, you have the opportunity to donate to support the children in need.</p>
+         <div style="margin-bottom: 15px;">
+            <label>Amount for the cause ($):</label>
+            <input type="number" id="causeInput" min="0" max="6" required />
+         </div>
+         <div style="margin-bottom: 15px;">
+            <label>Amount for overhead ($):</label>
+            <input type="number" id="overheadInput" min="0" max="6" required />
+         </div>
+         <button id="submitButton" disabled>Submit</button>
+         <p>Total cannot exceed $6.</p>
+      `;
+   },
+   on_load: function() {
+      let causeInput = document.getElementById("causeInput");
+      let overheadInput = document.getElementById("overheadInput");
+      let submitButton = document.getElementById("submitButton");
+
+      function validateDonation() {
+         let total = (parseFloat(causeInput.value) || 0) + (parseFloat(overheadInput.value) || 0);
+         submitButton.disabled = total > 6 || !causeInput.value || !overheadInput.value;
+      }
+
+      causeInput.addEventListener("input", validateDonation);
+      overheadInput.addEventListener("input", validateDonation);
+
+      submitButton.addEventListener("click", function() {
+         jsPsych.finishTrial({
+            causeDonation: parseFloat(causeInput.value),
+            overheadDonation: parseFloat(overheadInput.value),
+         });
+      });
+   }
+};
+
+// Satisfaction and donation experience
+var satisfaction = {
+   type: jsPsychSurveyMultiChoice,
+   questions: [
+      {prompt: "How satisfied are you with your donation decision?", options: ["1", "2", "3", "4", "5", "6", "7"], required: true},
+      {prompt: "How often do you donate to charity?", options: ["1", "2", "3", "4", "5", "6", "7"], required: true}
+   ]
+};
+
+// Demographic information and comments
+var demographics = {
+   type: jsPsychSurveyText,
+   questions: [
+      {prompt: "What is your age?", name: "age", required: true},
+      {prompt: "What is your gender?", name: "gender", required: true}
+   ]
+};
+
+var comments = {
+   type: jsPsychSurveyText,
+   questions: [
+      {prompt: "If you have any comments about this study, please leave them here."}
+   ]
+};
+
+// End of survey
+var endSurvey = {
+   type: jsPsychHtmlKeyboardResponse,
+   stimulus: "<p>Thank you for your participation in this study. If you are selected to receive a prize, we will contact you by the end of November.</p>"
+};
+
+// Adding all elements to the timeline
+timeline.push(welcome, survey_intro, unrelatedSurvey, attentionCheck, prizeExplanation, charityDescription, donationInput, satisfaction, demographics, comments, endSurvey);
+
+// Run the experiment
+jsPsych.run(timeline);
+</script>
+</html>
